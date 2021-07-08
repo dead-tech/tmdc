@@ -3,6 +3,10 @@
 # tmdc - Tiny Markdown Compiler
 Simple Markdown to HTML compiler written in Rust.
 
+## Features
+  - [x] Multi-line code blocks
+  - [x] Unordered lists 
+
 ## Dependecies
   * [rust](https://www.rust-lang.org/it)
   * [regex](https://docs.rs/regex/1.5.4/regex/) (may be removed)
