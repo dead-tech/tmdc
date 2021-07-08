@@ -4,6 +4,7 @@
 Simple Markdown to HTML compiler written in Rust.
 
 ## Features
+	- [x] Headings
   - [x] Multi-line code blocks
   - [x] Unordered lists 
 
