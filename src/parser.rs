@@ -2,11 +2,12 @@ use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 
-trait Parsable {
-    fn parse(parser: &mut Parser) -> Vec<String>;
+trait Parsable<T> {
+    fn parse(parser: &mut Parser) -> T;
 }
 
 pub enum Token {
+    Heading,
     CodeBlock,
     UnorderedList,
     General,
@@ -23,15 +24,24 @@ struct UnorderedLists {
 }
 
 #[derive(Debug, Clone)]
+struct Heading {}
+
+#[derive(Debug, Clone)]
 pub struct Parser {
     pub input_lines: Vec<String>,
     output_lines: Vec<String>,
     code_blocks: CodeBlocks,
     unordered_lists: UnorderedLists,
+    pub current_line: String,
 }
 
 impl Token {
     pub fn new(s: &str) -> Token {
+        // TODO: Come up with a better way of doing this, if there is any
+        if s.starts_with("#") {
+            return Token::Heading;
+        }
+
         match s {
             "```" => Token::CodeBlock,
             "*" => Token::UnorderedList,
@@ -40,7 +50,15 @@ impl Token {
     }
 }
 
-impl Parsable for CodeBlocks {
+impl Parsable<String> for Heading {
+    fn parse(parser: &mut Parser) -> String {
+        let heading_number = parser.current_line.matches("#").count();
+        let content = parser.current_line[heading_number + 1..].to_string();
+        format!("<h{}>{}</h{}>\n", heading_number, content, heading_number)
+    }
+}
+
+impl Parsable<Vec<String>> for CodeBlocks {
     fn parse(parser: &mut Parser) -> Vec<String> {
         let mut res = Vec::new();
         let mut it = parser.input_lines.iter();
@@ -59,7 +77,7 @@ impl Parsable for CodeBlocks {
     }
 }
 
-impl Parsable for UnorderedLists {
+impl Parsable<Vec<String>> for UnorderedLists {
     fn parse(parser: &mut Parser) -> Vec<String> {
         let mut res = Vec::new();
         let mut it = parser.input_lines.iter();
@@ -93,6 +111,7 @@ impl Parser {
             output_lines: Vec::new(),
             code_blocks: CodeBlocks { code_blocks },
             unordered_lists: UnorderedLists { unordered_lists },
+            current_line: String::from(""),
         }
     }
 
@@ -149,6 +168,7 @@ impl Parser {
         code_blocks
     }
 
+    // TODO: Check whether this function could become simpler
     fn parse_unordered_lists(lines: &Vec<String>) -> VecDeque<Vec<String>> {
         let mut unordered_lists_indices: Vec<_> = lines
             .iter()
@@ -192,6 +212,10 @@ impl Parser {
 
     pub fn parse(&mut self, token: Token) {
         match token {
+            Token::Heading => {
+                let res = Heading::parse(self);
+                self.output_lines.push(res);
+            }
             Token::CodeBlock => {
                 let mut res = CodeBlocks::parse(self);
                 self.output_lines.append(&mut res);

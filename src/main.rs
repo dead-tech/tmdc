@@ -73,10 +73,13 @@ use std::env::args;
 fn parse_markdown_file(file_path: &String) {
     let mut parser = Parser::new(file_path);
 
+    //TODO: Come up with a better idea for this
     let it = parser.clone();
     let mut it = it.input_lines.iter();
 
     while let Some(line) = it.next() {
+        //TODO: Come up with a better idea for this
+        parser.current_line = line.clone();
         let token = Token::new(
             line.chars()
                 .take_while(|ch| *ch != ' ')
