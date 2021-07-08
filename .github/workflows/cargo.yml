@@ -1,4 +1,4 @@
-name: Cargo Build CI
+name: build
 
 on:
   push:
