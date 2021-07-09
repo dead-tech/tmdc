@@ -67,7 +67,6 @@ impl Parsable<String> for Heading {
 
 impl Parsable<String> for Paragraph {
     fn parse(parser: &mut Parser) -> String {
-        //TODO: Only do this if it isn't a codeblock.
         if !parser.code_blocks.is_code_block(&parser.current_line) {
             return format!("<p>{}</p>\n", parser.current_line);
         }
