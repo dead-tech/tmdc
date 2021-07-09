@@ -14,17 +14,24 @@ pub enum Token {
 }
 
 #[derive(Debug, Clone)]
+struct Heading;
+
+#[derive(Debug, Clone)]
+struct Paragraph;
+
+#[derive(Debug, Clone)]
 struct CodeBlocks {
     code_blocks: VecDeque<Vec<String>>,
+    counter: usize,
+    skip: bool,
 }
 
 #[derive(Debug, Clone)]
 struct UnorderedLists {
     unordered_lists: VecDeque<Vec<String>>,
+    counter: usize,
+    max_counter: usize,
 }
-
-#[derive(Debug, Clone)]
-struct Heading {}
 
 #[derive(Debug, Clone)]
 pub struct Parser {
@@ -58,20 +65,49 @@ impl Parsable<String> for Heading {
     }
 }
 
+impl Parsable<String> for Paragraph {
+    fn parse(parser: &mut Parser) -> String {
+        //TODO: Only do this if it isn't a codeblock.
+        if !parser.code_blocks.is_code_block(&parser.current_line) {
+            return format!("<p>{}</p>\n", parser.current_line);
+        }
+        "".to_string()
+    }
+}
+
+impl CodeBlocks {
+    fn is_code_block(&self, line: &String) -> bool {
+        for blocks in &self.code_blocks {
+            for code_line in blocks {
+                if line == code_line {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
 impl Parsable<Vec<String>> for CodeBlocks {
     fn parse(parser: &mut Parser) -> Vec<String> {
         let mut res = Vec::new();
-        let mut it = parser.input_lines.iter();
 
-        if parser.code_blocks.code_blocks.len() > 0 {
-            let block = parser.code_blocks.code_blocks.pop_front().unwrap();
+        if parser.code_blocks.code_blocks.len() > 0 && !parser.code_blocks.skip {
+            let blocks = parser
+                .code_blocks
+                .code_blocks
+                .get(parser.code_blocks.counter);
 
-            it.nth(block.len());
-
-            res.push(format!(
-                "<code>\n<pre>\n{}\n</pre>\n</code>\n",
-                block.join("\n")
-            ));
+            match blocks {
+                Some(inner) => {
+                    res.push(format!(
+                        "<code>\n<pre>\n{}\n</pre>\n</code>\n",
+                        &inner.join("\n")
+                    ));
+                    parser.code_blocks.counter += 1;
+                }
+                None => {}
+            }
         }
         res
     }
@@ -80,20 +116,27 @@ impl Parsable<Vec<String>> for CodeBlocks {
 impl Parsable<Vec<String>> for UnorderedLists {
     fn parse(parser: &mut Parser) -> Vec<String> {
         let mut res = Vec::new();
-        let mut it = parser.input_lines.iter();
 
         if parser.unordered_lists.unordered_lists.len() > 0 {
-            let block = parser.unordered_lists.unordered_lists.pop_front().unwrap();
+            if parser.unordered_lists.counter == 0 {
+                let blocks = parser.unordered_lists.unordered_lists.pop_front().unwrap();
 
-            it.nth(block.len());
+                res.push(format!(
+                    "<ul>{}\n</ul>\n",
+                    blocks
+                        .iter()
+                        .map(|s| format!("\n<li>\n{}\n</li>", s))
+                        .collect::<String>()
+                ));
+            }
 
-            res.push(format!(
-                "<ul>{}\n</ul>\n",
-                block
-                    .iter()
-                    .map(|s| format!("\n<li>\n{}\n</li>", s))
-                    .collect::<String>()
-            ));
+            parser.unordered_lists.counter += 1;
+
+            if parser.unordered_lists.counter == parser.unordered_lists.max_counter {
+                parser.unordered_lists.max_counter =
+                    parser.unordered_lists.unordered_lists[0].len();
+                parser.unordered_lists.counter = 0;
+            }
         }
         res
     }
@@ -109,8 +152,16 @@ impl Parser {
         Parser {
             input_lines,
             output_lines: Vec::new(),
-            code_blocks: CodeBlocks { code_blocks },
-            unordered_lists: UnorderedLists { unordered_lists },
+            code_blocks: CodeBlocks {
+                code_blocks,
+                counter: 0,
+                skip: false,
+            },
+            unordered_lists: UnorderedLists {
+                unordered_lists: unordered_lists.clone(),
+                counter: 0,
+                max_counter: unordered_lists.get(0).unwrap_or(&vec![]).len(),
+            },
             current_line: String::from(""),
         }
     }
@@ -193,20 +244,23 @@ impl Parser {
             i += 1;
         }
 
-        consecutives.push(unordered_lists_indices);
+        let mut unordered_lists_blocks = VecDeque::new();
 
-        let unordered_lists_blocks: VecDeque<_> = consecutives
-            .iter()
-            .map(|el| {
-                lines
-                    .iter()
-                    .skip(el[0])
-                    .take(el[el.len() - 1] - el[0] + 1)
-                    .map(|s| s.clone()[2..].to_string())
-                    .collect::<Vec<_>>()
-            })
-            .collect();
+        if unordered_lists_indices.len() > 0 {
+            consecutives.push(unordered_lists_indices);
 
+            unordered_lists_blocks = consecutives
+                .iter()
+                .map(|el| {
+                    lines
+                        .iter()
+                        .skip(el[0])
+                        .take(el[el.len() - 1] - el[0] + 1)
+                        .map(|s| s.clone()[2..].to_string())
+                        .collect::<Vec<_>>()
+                })
+                .collect();
+        }
         unordered_lists_blocks
     }
 
@@ -218,13 +272,17 @@ impl Parser {
             }
             Token::CodeBlock => {
                 let mut res = CodeBlocks::parse(self);
+                self.code_blocks.skip = !self.code_blocks.skip;
                 self.output_lines.append(&mut res);
             }
             Token::UnorderedList => {
                 let mut res = UnorderedLists::parse(self);
                 self.output_lines.append(&mut res);
             }
-            _ => {}
+            Token::General => {
+                let res = Paragraph::parse(self);
+                self.output_lines.push(res);
+            }
         }
     }
 }
