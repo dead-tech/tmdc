@@ -61,14 +61,22 @@ impl Parsable<String> for Heading {
     fn parse(parser: &mut Parser) -> String {
         let heading_number = parser.current_line.matches("#").count();
         let content = parser.current_line[heading_number + 1..].to_string();
-        format!("<h{}>{}</h{}>\n", heading_number, content, heading_number)
+        format!(
+            "<h{}>{}</h{}>\n",
+            heading_number,
+            Parser::check_bold_italic(content),
+            heading_number
+        )
     }
 }
 
 impl Parsable<String> for Paragraph {
     fn parse(parser: &mut Parser) -> String {
         if !parser.code_blocks.is_code_block(&parser.current_line) {
-            return format!("<p>{}</p>\n", parser.current_line);
+            return format!(
+                "<p>{}</p>\n",
+                Parser::check_bold_italic(parser.current_line.clone())
+            );
         }
         "".to_string()
     }
@@ -123,8 +131,11 @@ impl Parsable<Vec<String>> for UnorderedLists {
                 res.push(format!(
                     "<ul>{}\n</ul>\n",
                     blocks
-                        .iter()
-                        .map(|s| format!("\n<li>\n{}\n</li>", s))
+                        .into_iter()
+                        .map(|s| {
+                            let new_str = Parser::check_bold_italic(s);
+                            format!("\n<li>\n{}\n</li>", new_str)
+                        })
                         .collect::<String>()
                 ));
             }
@@ -283,5 +294,23 @@ impl Parser {
                 self.output_lines.push(res);
             }
         }
+    }
+
+    fn check_bold_italic(line: String) -> String {
+        let mut res = Parser::replace_n(line, "**", "strong");
+        res = Parser::replace_n(res, "__", "strong");
+        res = Parser::replace_n(res, "*", "italic");
+        res = Parser::replace_n(res, "_", "italic");
+
+        res
+    }
+
+    fn replace_n(mut s: String, from: &str, to: &str) -> String {
+        for _ in 0..s.matches(from).count() / 2 {
+            s = s.replacen(from, format!("<{}>", to).as_str(), 1);
+            s = s.replacen(from, format!("</{}>", to).as_str(), 1);
+        }
+
+        s
     }
 }
