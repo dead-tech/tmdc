@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+      - name: cargo test --verbose linux
         run: cargo test --verbose
 
   tests-macos:
@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+      - name: cargo test --verbose macos
         run: cargo test --verbose
 
   tests-windows:
@@ -31,5 +31,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+      - name: cargo test --verbose windows
         run: cargo test --verbose
