@@ -13,10 +13,8 @@ Simple Markdown to HTML compiler written in Rust.
 
 ## Dependecies
   * [rust](https://www.rust-lang.org/it)
-  * [regex](https://docs.rs/regex/1.5.4/regex/) (may be removed)
 
 ## Usage
-
   ### Running with cargo
   ```sh
   $ cargo run -- <filepath>.md
@@ -27,3 +25,5 @@ Simple Markdown to HTML compiler written in Rust.
   $ cargo build
   $ ./target/debug/tmdc <filepath>.md
   ```
+
+  Test files can be found in the examples dir.
