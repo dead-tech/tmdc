@@ -1,4 +1,5 @@
-![example workflow](https://github.com/Dead-tech/tmdc/actions/workflows/cargo.yml/badge.svg)
+![example workflow](https://github.com/Dead-tech/tmdc/actions/workflows/build.yml/badge.svg)
+![example workflow](https://github.com/Dead-tech/tmdc/actions/workflows/tests.yml/badge.svg)
 
 # tmdc - Tiny Markdown Compiler
 Simple Markdown to HTML compiler written in Rust.
