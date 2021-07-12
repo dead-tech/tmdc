@@ -1,33 +1,12 @@
+pub mod fs;
+pub mod parsable;
 pub mod parser;
+pub mod util;
 
 use core::panic;
-use parser::{Parser, Token};
-use std::env::args;
-
-fn parse_markdown_file(file_path: &String) {
-    let mut parser = Parser::new(file_path);
-
-    //TODO: Come up with a better idea for this
-    let it = parser.clone();
-    let mut it = it.input_lines.iter();
-
-    while let Some(line) = it.next() {
-        //TODO: Come up with a better idea for this
-        if !line.is_empty() {
-            parser.current_line = line.clone();
-            let token = Token::new(
-                line.chars()
-                    .take_while(|ch| *ch != ' ')
-                    .collect::<String>()
-                    .as_str(),
-            );
-
-            parser.parse(token);
-        }
-    }
-
-    parser.write_to_file("test.html");
-}
+use fs::file_handler::FileHandler;
+use parser::{Parser, ParserState, Token};
+use std::{env::args, vec};
 
 fn main() {
     let args: Vec<String> = args().collect();
@@ -36,5 +15,29 @@ fn main() {
         panic!("Please provide a path to an existing file.")
     }
 
-    parse_markdown_file(&args[1]);
+    let lines = FileHandler::read(&args[1]);
+    let mut output_lines = vec![];
+
+    let mut state = ParserState {
+        input_lines: lines.clone(),
+        token: Token::General,
+        current_line: (0, String::from("")),
+        code_blocks: vec![],
+        next_ul: 0,
+    };
+
+    for (line_number, line) in lines.iter().enumerate() {
+        state.token = Token::new(
+            line.chars()
+                .take_while(|ch| *ch != ' ')
+                .collect::<String>()
+                .as_str(),
+        );
+
+        state.current_line = (line_number, line.clone());
+
+        output_lines.push(Parser::parse(&mut state));
+    }
+
+    FileHandler::write(&args[1].replace(".md", ".html"), output_lines);
 }
