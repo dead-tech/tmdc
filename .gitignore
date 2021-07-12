@@ -2,5 +2,4 @@
 .prettierignore
 Cargo.lock
 *.html
-*.md
 .vscode/
