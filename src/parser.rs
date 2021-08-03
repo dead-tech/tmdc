@@ -39,6 +39,13 @@ pub struct Parser;
 
 impl Parser {
     pub fn parse(mut state: &mut ParserState) -> String {
+        let current_line = &mut state.current_line.1;
+
+        let last_two = current_line.chars().rev().take(2).collect::<String>();
+        if last_two == "  " {
+               current_line.push_str("<br />");
+        }
+
         match state.token {
             Token::Heading => Heading::parse(state),
             Token::CodeBlock => CodeBlocks::parse(&mut state),

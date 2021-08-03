@@ -40,7 +40,5 @@ fn main() {
         output_lines.push(Parser::parse(&mut state));
     }
 
-    println!("{:#?}", output_lines);
-
     FileHandler::write(&args[1].replace(".md", ".html"), output_lines);
 }
