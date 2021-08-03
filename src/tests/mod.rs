@@ -276,76 +276,43 @@ fn test_no_unordered_list() {
 }
 
 #[test]
-fn test_all() {
-    use crate::fs::file_handler::FileHandler;
+fn test_line_breaks() {
+    use std::vec;
+
     use crate::parser::Parser;
     use crate::parser::ParserState;
     use crate::parser::Token;
 
-    let lines = FileHandler::read("examples/general.md");
-    let mut output_lines = vec![];
-
     let mut state = ParserState {
-        input_lines: lines.clone(),
+        input_lines: vec![String::from("line break here:  ")],
         token: Token::General,
-        current_line: (0, String::from("")),
+        current_line: (0, String::from("line break here:  ")),
         code_blocks: vec![],
         next_ul: 0,
     };
 
-    for (line_number, line) in lines.iter().enumerate() {
-        state.token = Token::new(
-            line.chars()
-                .take_while(|ch| *ch != ' ')
-                .collect::<String>()
-                .as_str(),
-        );
+    let res = Parser::parse(&mut state);
 
-        state.current_line = (line_number, line.clone());
+    assert_eq!(res, "<p>line break here:  <br /></p>\n")
+}
 
-        output_lines.push(Parser::parse(&mut state));
-    }
+#[test]
+fn test_no_line_breaks() {
+    use std::vec;
 
-    println!("{:#?}", output_lines);
+    use crate::parser::Parser;
+    use crate::parser::ParserState;
+    use crate::parser::Token;
 
-    let res = r#"<h6>This <strong>is</strong> the updated <italic>version</italic> </h6>
-<h3>Test Markdown</h3>
-<h4>This is <italic>yet</italic> more updated</h4>
-<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsa dicta fuga officiis magni officia eum laudantium repellat blanditiis hic ea?</p>
-<h1>speriamo bene</h1>
-<code>
-	<pre>
-ciaoooooooo
-hellooooo 
-	</pre>
-</code>
-<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Alias unde dignissimos harum veritatis eveniet cupiditate debitis iste dolore eligendi id similique laudantium assumenda expedita quas tempore praesentium deserunt, modi sint minus numquam eius! Eveniet, similique. Quisquam natus rerum veniam quae id beatae repudiandae, quis culpa, mollitia ullam iure ratione! Quasi.</p>
-<h1>sono fiducioso</h1>
-<ul>
-	<li>headings</li>
-	<li>paragraphs</li>
-	<li><strong>italic</strong> wip</li>
-	<li>bold <italic>wip</italic></li>
-	<li>line breaks</li>
-	<li>single <strong>line</strong> code</li>
-	<li>unordered <italic>lists</italic> wip</li>
+    let mut state = ParserState {
+        input_lines: vec![String::from("no line break here")],
+        token: Token::General,
+        current_line: (0, String::from("no line break here")),
+        code_blocks: vec![],
+        next_ul: 0,
+    };
 
-</ul>
-<h1>speriamo tutto bene</h1>
-<code>
-	<pre>
-test
-non funziona 100%
-	</pre>
-</code>
-<h1>wewewewewe</h1>
-<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sed provident aperiam, sapiente laudantium ipsam pariatur autem consequuntur corrupti. Voluptate incidunt ea repellat amet, quae nisi aspernatur? Nulla eos cum mollitia?</p>
-<ul>
-	<li>more test</li>
-	<li>another one</li>
+    let res = Parser::parse(&mut state);
 
-</ul>
-"#;
-
-    assert_eq!(res, output_lines.join(""));
+    assert_eq!(res, "<p>no line break here</p>\n")
 }

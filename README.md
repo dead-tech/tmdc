@@ -11,6 +11,7 @@ Simple Markdown to HTML compiler written in Rust.
   - [x] Bold
   - [x] Multi-line code blocks
   - [x] Unordered lists 
+  - [x] Line Breaks
 
 ## Dependecies
   * [rust](https://www.rust-lang.org/it)

@@ -1,4 +1,4 @@
-###### This **is** the updated _version_ 
+###### This **is** the updated _version_
 ### Test Markdown
 #### This is _yet_ more updated
 
@@ -8,7 +8,7 @@ Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ipsa dicta fuga offici
 
 ```
 ciaoooooooo
-hellooooo 
+hellooooo
 ```
 
 Lorem ipsum, dolor sit amet consectetur adipisicing elit. Alias unde dignissimos harum veritatis eveniet cupiditate debitis iste dolore eligendi id similique laudantium assumenda expedita quas tempore praesentium deserunt, modi sint minus numquam eius! Eveniet, similique. Quisquam natus rerum veniam quae id beatae repudiandae, quis culpa, mollitia ullam iure ratione! Quasi.
@@ -27,7 +27,7 @@ Lorem ipsum, dolor sit amet consectetur adipisicing elit. Alias unde dignissimos
 
 ```
 test
-non funziona 100%
+non funziona 100%  
 ```
 
 # wewewewewe
@@ -36,3 +36,6 @@ Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sed provident aperiam,
 
 * more test
 * another one
+
+Line break test
+End of line break test
