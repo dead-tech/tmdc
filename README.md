@@ -2,9 +2,10 @@
 ![example workflow](https://github.com/Dead-tech/tmdc/actions/workflows/tests.yml/badge.svg)
 
 # tmdc - Tiny Markdown Compiler
-Simple Markdown to HTML compiler written in Rust.
 
-**_DISCLAIMER: The language itself hasn't been developed yet!_**
+**This project is still in active development, use it at your own risk!_**
+
+Simple Markdown to HTML compiler written in Rust.
 
 ## Features
   - [x] Headings
