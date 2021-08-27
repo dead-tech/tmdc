@@ -4,6 +4,8 @@
 # tmdc - Tiny Markdown Compiler
 Simple Markdown to HTML compiler written in Rust.
 
+**_DISCLAIMER: The language itself hasn't been developed yet!_**
+
 ## Features
   - [x] Headings
   - [x] Paragraphs
