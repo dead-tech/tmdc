@@ -3,7 +3,7 @@
 
 # tmdc - Tiny Markdown Compiler
 
-**This project is still in active development, use it at your own risk!_**
+**_This project is still in active development, use it at your own risk!_**
 
 Simple Markdown to HTML compiler written in Rust.
 
